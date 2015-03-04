@@ -163,15 +163,20 @@ class FileWrapper(object):
 
 def save_image(img, outfile, format, options=None, autoconvert=True):
     """
-    Wraps PIL's ``Image.save()`` method. There are two main benefits of using
+    Wraps PIL's ``Image.save()`` method. There are three main benefits of using
     this function over PIL's:
 
     1. It gracefully handles the infamous "Suspension not allowed here" errors.
     2. It prepares the image for saving using ``prepare_image()``, which will do
         some common-sense processing given the target format.
+    3. It preserves the image's ICC profile if one exists. (PIL will by default
+        discard it.)
 
     """
     options = options or {}
+
+    if not 'icc_profile' in options:
+        options['icc_profile'] = img.info.get('icc_profile')
 
     if autoconvert:
         img, save_kwargs = prepare_image(img, format)
